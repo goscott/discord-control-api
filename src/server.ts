@@ -35,6 +35,14 @@ export const start = async (config: {
     response.sendStatus(200)
   })
 
+  app.get('/members', async (_, response) => {
+    try {
+      response.json({ members: controller.getCurrentMembers() })
+    } catch {
+      response.sendStatus(500)
+    }
+  })
+
   app.get('/mute', async (_, response) => {
     try {
       response.json({ muted: controller.isMuted() })

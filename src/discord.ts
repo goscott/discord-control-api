@@ -80,4 +80,8 @@ export class DiscordController {
     }
     await member.voice.setMute(false)
   }
+
+  getCurrentMembers() {
+    return (this.channel!.members as Collection<string, GuildMember>).map((_) => _.user.username)
+  }
 }
