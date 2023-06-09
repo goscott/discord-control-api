@@ -45,11 +45,9 @@ export class DiscordController {
   }
 
   getMember(): GuildMember | undefined {
-    if (!this.member) {
-      this.member = (this.channel!.members as Collection<string, GuildMember>).find(
+    this.member = (this.channel!.members as Collection<string, GuildMember>).find(
         (_) => _.user.username === this.memberUsername
       )
-    }
     return this.member
   }
 
@@ -60,7 +58,7 @@ export class DiscordController {
   isMuted() {
     const member = this.getMember()
     if (!member) {
-      throw Error('Client not ready')
+      return true
     }
     return member.voice.mute
   }
