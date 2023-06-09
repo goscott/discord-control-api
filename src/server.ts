@@ -36,17 +36,29 @@ export const start = async (config: {
   })
 
   app.get('/mute', async (_, response) => {
-    response.json({ muted: controller.isMuted() })
+    try {
+      response.json({ muted: controller.isMuted() })
+    } catch {
+      response.sendStatus(500)
+    }
   })
 
   app.post('/mute', async (_, response) => {
-    await controller.mute()
-    response.json({ muted: controller.isMuted() })
+    try {
+      await controller.mute()
+      response.json({ muted: controller.isMuted() })
+    } catch {
+      response.sendStatus(500)
+    }
   })
 
   app.delete('/mute', async (_, response) => {
-    await controller.unMute()
-    response.json({ muted: controller.isMuted() })
+    try {
+      await controller.unMute()
+      response.json({ muted: controller.isMuted() })
+    } catch {
+      response.sendStatus(500)
+    }
   })
 
   const ipAddress = ip.address()

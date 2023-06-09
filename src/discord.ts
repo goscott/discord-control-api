@@ -1,5 +1,12 @@
 import assert from 'assert'
-import { ChannelType, Client, Collection, GatewayIntentBits, GuildMember } from 'discord.js'
+import {
+  ChannelType,
+  Client,
+  Collection,
+  GatewayIntentBits,
+  GuildBasedChannel,
+  GuildMember,
+} from 'discord.js'
 
 export interface DiscordControllerProps {
   token: string
@@ -10,10 +17,13 @@ export interface DiscordControllerProps {
 
 export class DiscordController {
   client: Client
+  channel: GuildBasedChannel | undefined
   member: GuildMember | undefined
+  memberUsername: string
   token: string
 
   constructor(props: DiscordControllerProps) {
+    this.memberUsername = props.username
     this.token = props.token
     this.client = new Client({
       intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
@@ -25,16 +35,22 @@ export class DiscordController {
       const guild = this.client.guilds.cache.find((_) => _.name === props.serverName)
       assert.ok(guild, `Unable to find a server called "${props.serverName}"`)
 
-      const channel = guild.channels.cache.find(
+      this.channel = guild.channels.cache.find(
         (_) => _.name === props.channelName && _.type === ChannelType.GuildVoice
-      )
-      assert.ok(channel, `Unable to find a voice channel called "${props.channelName}"`)
+      )!
+      assert.ok(this.channel, `Unable to find a voice channel called "${props.channelName}"`)
 
-      this.member = (channel.members as Collection<string, GuildMember>).find(
-        (_) => _.user.username === props.username
-      )
-      assert.ok(this.member, `Unable to find a user called "${props.username}"`)
+      this.getMember()
     })
+  }
+
+  getMember(): GuildMember | undefined {
+    if (!this.member) {
+      this.member = (this.channel!.members as Collection<string, GuildMember>).find(
+        (_) => _.user.username === this.memberUsername
+      )
+    }
+    return this.member
   }
 
   async login() {
@@ -42,25 +58,26 @@ export class DiscordController {
   }
 
   isMuted() {
-    if (!this.member) {
+    const member = this.getMember()
+    if (!member) {
       throw Error('Client not ready')
     }
-    return this.member.voice.mute
+    return member.voice.mute
   }
 
   async mute() {
-    if (!this.member) {
+    const member = this.getMember()
+    if (!member) {
       throw Error('Client not ready')
     }
-    console.log('Muting')
-    await this.member.voice.setMute(true)
+    await member.voice.setMute(true)
   }
 
   async unMute() {
-    if (!this.member) {
+    const member = this.getMember()
+    if (!member) {
       throw Error('Client not ready')
     }
-    console.log('Unmuting')
-    await this.member.voice.setMute(false)
+    await member.voice.setMute(false)
   }
 }
