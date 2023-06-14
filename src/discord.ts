@@ -26,7 +26,11 @@ export class DiscordController {
     this.memberUsername = props.username
     this.token = props.token
     this.client = new Client({
-      intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
+      intents: [
+        GatewayIntentBits.Guilds,
+        GatewayIntentBits.GuildVoiceStates,
+        GatewayIntentBits.GuildMembers,
+      ],
     })
 
     this.client.on('ready', async () => {
@@ -81,5 +85,13 @@ export class DiscordController {
 
   getCurrentMembers() {
     return (this.channel!.members as Collection<string, GuildMember>).map((_) => _.user.username)
+  }
+
+  async disconnect() {
+    const member = this.getMember()
+    if (!member) {
+      throw Error('Client not ready')
+    }
+    await member.voice.disconnect()
   }
 }

@@ -69,6 +69,15 @@ export const start = async (config: {
     }
   })
 
+  app.post('/disconnect', async (_, response) => {
+    try {
+      await controller.disconnect()
+      response.json({ disconnect: true })
+    } catch {
+      response.sendStatus(500)
+    }
+  })
+
   const ipAddress = ip.address()
 
   app.listen(config.port, ipAddress, () => {
